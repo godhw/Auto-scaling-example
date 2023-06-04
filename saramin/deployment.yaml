@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}
+  labels:
+    {{- include "app.labels". | nindent 4 }}
+spec:
+{{- if not .Values.hpa.enabled }}
+  replicas: {{ .Values.hpa.minReplicas }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "app.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          resources:
+            requests:
+              cpu: 100m
+              memory: 90Mi
+        - name: php-fpm
+          image: php:fpm
+          resources:
+            requests:
+              cpu: 1000m
+            limits:
+              cpu: 1000m
